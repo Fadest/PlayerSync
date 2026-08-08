@@ -25,8 +25,10 @@ public class RedisMessenger {
 
     private volatile boolean running;
     private volatile JedisPubSub subscriber;
+
     @Setter
     private volatile Consumer<UUID> releaseRequestHandler;
+
     private Thread subscriberThread;
 
     public RedisMessenger(RedisClient client, String channel, String serverId, Logger logger) {
@@ -118,7 +120,10 @@ public class RedisMessenger {
 
                 long delay = hold.get();
 
-                logger.log(Level.WARNING, "Redis Pub/Sub connection has been lost. Retrying in " + delay + " ms.", exception);
+                logger.log(
+                        Level.WARNING,
+                        "Redis Pub/Sub connection has been lost. Retrying in " + delay + " ms.",
+                        exception);
 
                 // Pause before trying to subscribe() again
                 if (!sleepWithoutException(delay)) {

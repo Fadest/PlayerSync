@@ -23,11 +23,15 @@ public class MongoManager {
 
     @Getter
     private static volatile MongoManager instance;
+
     private final MongoClient client;
+
     @Getter
     private final MongoDatabase database;
+
     @Getter
     private final String collectionName;
+
     private final ExecutorService executor;
 
     private MongoManager(MongoStorageCredentials storageCredentials) {
@@ -47,8 +51,8 @@ public class MongoManager {
             manager.database.runCommand(new Document("ping", 1));
         } catch (RuntimeException exception) {
             manager.closeDatabase();
-            throw new IllegalStateException("Could not connect to MongoDB ("
-                    + storageCredentials.describe() + ")", exception);
+            throw new IllegalStateException(
+                    "Could not connect to MongoDB (" + storageCredentials.describe() + ")", exception);
         }
 
         instance = manager;
@@ -57,9 +61,11 @@ public class MongoManager {
     private static MongoClientSettings buildSettings(MongoStorageCredentials storageCredentials) {
         return MongoClientSettings.builder()
                 .applicationName("PlayerSync")
-                .applyToClusterSettings(cluster -> cluster.serverSelectionTimeout(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS))
+                .applyToClusterSettings(
+                        cluster -> cluster.serverSelectionTimeout(TIMEOUT_MILLIS, TimeUnit.MILLISECONDS))
                 .applyConnectionString(parse(storageCredentials.getUri()))
-                .uuidRepresentation(UuidRepresentation.STANDARD).build();
+                .uuidRepresentation(UuidRepresentation.STANDARD)
+                .build();
     }
 
     private static ConnectionString parse(String uri) {
@@ -70,10 +76,7 @@ public class MongoManager {
         try {
             return new ConnectionString(uri);
         } catch (IllegalArgumentException exception) {
-            throw new IllegalStateException("The MongoDB uri is not valid. If the username or "
-                    + "password contain any of the characters : / ? # [ ] @, they must be "
-                    + "percent-encoded (for example '@' is written '%40'). Detail: "
-                    + exception.getMessage(), exception);
+            throw new IllegalStateException("The MongoDB uri is not valid", exception);
         }
     }
 

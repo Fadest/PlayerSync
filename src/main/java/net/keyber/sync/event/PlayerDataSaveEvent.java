@@ -19,6 +19,7 @@ public class PlayerDataSaveEvent extends PlayerEvent implements Cancellable {
 
     @NotNull
     private PlayerSnapshot snapshot;
+
     private boolean cancelled;
 
     public PlayerDataSaveEvent(Player player, @NotNull PlayerSnapshot snapshot, Cause cause) {

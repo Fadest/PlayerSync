@@ -1,5 +1,6 @@
 package net.keyber.sync.listener;
 
+import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import lombok.RequiredArgsConstructor;
 import net.keyber.sync.service.SyncService;
 import net.kyori.adventure.text.Component;
@@ -8,7 +9,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
-import com.destroystokyo.paper.event.player.PlayerConnectionCloseEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -26,10 +26,9 @@ public class ConnectionListener implements Listener {
 
         switch (outcome.status()) {
             case LOCKED -> disallow(event, Component.text(
-                    "Your data is still being saved on another server. Try again in a few seconds.",
-                    NamedTextColor.RED));
-            case ERROR -> disallow(event, Component.text(
-                    "Your data could not be loaded.", NamedTextColor.RED));
+                            "Your data is still being saved on another server. Try again in a few seconds.",
+                            NamedTextColor.RED));
+            case ERROR -> disallow(event, Component.text("Your data could not be loaded.", NamedTextColor.RED));
         }
     }
 

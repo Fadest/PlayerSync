@@ -14,7 +14,13 @@ public record LocationData(UUID uid, double x, double y, double z, float yaw, fl
             return null;
         }
 
-        return new LocationData(location.getWorld().getUID(), location.getX(), location.getY(), location.getZ(), location.getYaw(), location.getPitch());
+        return new LocationData(
+                location.getWorld().getUID(),
+                location.getX(),
+                location.getY(),
+                location.getZ(),
+                location.getYaw(),
+                location.getPitch());
     }
 
     @Nullable

@@ -10,10 +10,6 @@ public record PlayerSession(State state, PlayerSnapshot snapshot) {
         TRANSFERRED
     }
 
-    public static PlayerSession pending(PlayerSnapshot snapshot) {
-        return new PlayerSession(State.PENDING_LOGIN, snapshot);
-    }
-
     public boolean is(State other) {
         return state == other;
     }

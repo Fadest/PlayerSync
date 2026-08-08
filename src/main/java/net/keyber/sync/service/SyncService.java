@@ -1,17 +1,17 @@
 package net.keyber.sync.service;
 
 import net.keyber.sync.PlayerSync;
+import net.keyber.sync.data.PlayerSnapshot;
 import net.keyber.sync.event.PlayerDataApplyEvent;
 import net.keyber.sync.event.PlayerDataLoadEvent;
 import net.keyber.sync.event.PlayerDataSaveEvent;
-import net.keyber.sync.data.PlayerSnapshot;
 import net.keyber.sync.listener.AdvancementListener;
 import net.keyber.sync.service.data.PlayerDataApplier;
 import net.keyber.sync.service.data.PlayerDataCapturer;
+import net.keyber.sync.service.util.LockWaitRegistry;
 import net.keyber.sync.service.util.PendingWriteQueue;
 import net.keyber.sync.storage.PlayerRepository;
 import net.keyber.sync.storage.mongo.MongoManager;
-import net.keyber.sync.service.util.LockWaitRegistry;
 import net.keyber.sync.storage.redis.RedisMessenger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -53,7 +53,12 @@ public class SyncService {
     private final PendingWriteQueue pendingWrites;
     private final SyncTasks tasks;
 
-    public SyncService(PlayerSync plugin, PlayerRepository repository, SyncSettings settings, @Nullable RedisMessenger messenger, Logger logger) {
+    public SyncService(
+            PlayerSync plugin,
+            PlayerRepository repository,
+            SyncSettings settings,
+            @Nullable RedisMessenger messenger,
+            Logger logger) {
         this.plugin = plugin;
         this.repository = repository;
         this.settings = settings;
@@ -159,8 +164,7 @@ public class SyncService {
             return;
         }
 
-        sessions.computeIfPresent(uuid, (key, current) ->
-                current.withState(PlayerSession.State.TRANSFERRED));
+        sessions.computeIfPresent(uuid, (key, current) -> current.withState(PlayerSession.State.TRANSFERRED));
 
         MongoManager.getInstance().runAsync(() -> {
             try {
@@ -170,7 +174,10 @@ public class SyncService {
                     pendingWrites.queue(snapshot);
                 }
 
-                logger.log(Level.SEVERE, "Failed to save " + player.getName() + " while transferring to another server.", exception);
+                logger.log(
+                        Level.SEVERE,
+                        "Failed to save " + player.getName() + " while transferring to another server.",
+                        exception);
             } finally {
                 announceRelease(uuid);
             }
@@ -180,30 +187,39 @@ public class SyncService {
     }
 
     private void scheduleTransferReacquire(UUID uuid) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-            PlayerSession session = sessions.get(uuid);
+        plugin.getServer()
+                .getScheduler()
+                .runTaskLater(
+                        plugin,
+                        () -> {
+                            PlayerSession session = sessions.get(uuid);
 
-            if (session == null || !session.is(PlayerSession.State.TRANSFERRED)) {
-                return;
-            }
+                            if (session == null || !session.is(PlayerSession.State.TRANSFERRED)) {
+                                return;
+                            }
 
-            Player player = plugin.getServer().getPlayer(uuid);
+                            Player player = plugin.getServer().getPlayer(uuid);
 
-            if (player == null || !player.isOnline()) {
-                sessions.remove(uuid);
-                return;
-            }
+                            if (player == null || !player.isOnline()) {
+                                sessions.remove(uuid);
+                                return;
+                            }
 
-            MongoManager.getInstance().runAsync(() -> {
-                try {
-                    if (repository.acquire(uuid).acquired()) {
-                        sessions.computeIfPresent(uuid, (key, current) -> current.withState(PlayerSession.State.MANAGED));
-                    }
-                } catch (RuntimeException exception) {
-                    logger.log(Level.WARNING, "Failed to take back the lock for " + player.getName(), exception);
-                }
-            });
-        }, TRANSFER_REACQUIRE_TICKS);
+                            MongoManager.getInstance().runAsync(() -> {
+                                try {
+                                    if (repository.acquire(uuid).acquired()) {
+                                        sessions.computeIfPresent(
+                                                uuid, (key, current) -> current.withState(PlayerSession.State.MANAGED));
+                                    }
+                                } catch (RuntimeException exception) {
+                                    logger.log(
+                                            Level.WARNING,
+                                            "Failed to take back the lock for " + player.getName(),
+                                            exception);
+                                }
+                            });
+                        },
+                        TRANSFER_REACQUIRE_TICKS);
     }
 
     private LockWaitRegistry.Watch watch(UUID uuid) {
@@ -244,7 +260,10 @@ public class SyncService {
         try {
             applier.apply(player, snapshot);
         } catch (RuntimeException exception) {
-            logger.log(Level.SEVERE, "Failed to apply data to " + player.getName() + ", their session will not be managed.", exception);
+            logger.log(
+                    Level.SEVERE,
+                    "Failed to apply data to " + player.getName() + ", their session will not be managed.",
+                    exception);
             sessions.remove(uuid);
 
             MongoManager.getInstance().runAsync(() -> {
@@ -259,8 +278,7 @@ public class SyncService {
             AdvancementListener.APPLYING_ADVANCEMENTS.remove(uuid);
         }
 
-        sessions.computeIfPresent(uuid, (key, current) ->
-                current.withState(PlayerSession.State.MANAGED));
+        sessions.computeIfPresent(uuid, (key, current) -> current.withState(PlayerSession.State.MANAGED));
 
         teleportOnJoin(player, snapshot);
     }
@@ -373,7 +391,8 @@ public class SyncService {
         writeOnShutdown(snapshots);
 
         if (messenger != null) {
-            messenger.publishLockReleased(snapshots.stream().map(PlayerSnapshot::uuid).toList());
+            messenger.publishLockReleased(
+                    snapshots.stream().map(PlayerSnapshot::uuid).toList());
         }
 
         sessions.clear();
@@ -435,7 +454,10 @@ public class SyncService {
                 return;
             } catch (RuntimeException exception) {
                 if (attempt == SHUTDOWN_WRITE_ATTEMPTS) {
-                    logger.log(Level.SEVERE, "Could not save the data of " + snapshots.size() + " player(s) during shutdown.", exception);
+                    logger.log(
+                            Level.SEVERE,
+                            "Could not save the data of " + snapshots.size() + " player(s) during shutdown.",
+                            exception);
                     return;
                 }
 

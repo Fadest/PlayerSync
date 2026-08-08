@@ -1,15 +1,8 @@
 package net.keyber.sync.service.data;
 
 import lombok.RequiredArgsConstructor;
-import net.keyber.sync.data.impl.AdvancementsData;
-import net.keyber.sync.data.impl.EffectData;
-import net.keyber.sync.data.impl.InventoryData;
-import net.keyber.sync.data.impl.ItemContainer;
-import net.keyber.sync.data.impl.LocationData;
-import net.keyber.sync.data.impl.LocationsData;
 import net.keyber.sync.data.PlayerSnapshot;
-import net.keyber.sync.data.impl.ProfileData;
-import net.keyber.sync.data.impl.StateData;
+import net.keyber.sync.data.impl.*;
 import net.keyber.sync.service.SyncSettings;
 import org.bukkit.Bukkit;
 import org.bukkit.Statistic;
@@ -20,14 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @RequiredArgsConstructor
 public class PlayerDataCapturer {
@@ -46,10 +32,7 @@ public class PlayerDataCapturer {
 
     private ProfileData captureProfile(Player player, PlayerSnapshot previous) {
         return new ProfileData(
-                player.getName(),
-                firstSeen(previous),
-                System.currentTimeMillis(),
-                settings.getServerId());
+                player.getName(), firstSeen(previous), System.currentTimeMillis(), settings.getServerId());
     }
 
     private StateData captureState(Player player) {
@@ -86,10 +69,11 @@ public class PlayerDataCapturer {
 
         return new LocationsData(
                 ignored ? previousLast(previous) : current,
-                settings.isRespawnLocationEnabled() ? settings.filterIgnoredWorld(LocationData.of(player.getRespawnLocation())) : null,
+                settings.isRespawnLocationEnabled()
+                        ? settings.filterIgnoredWorld(LocationData.of(player.getRespawnLocation()))
+                        : null,
                 capturePerWorld(previous, current));
     }
-
 
     private Map<UUID, LocationData> capturePerWorld(PlayerSnapshot previous, LocationData current) {
         if (!settings.isPerWorldLocationsEnabled()) {
@@ -98,8 +82,11 @@ public class PlayerDataCapturer {
 
         Map<UUID, LocationData> perWorld = new LinkedHashMap<>();
 
-        if (previous != null && previous.locations() != null && previous.locations().perWorld() != null) {
-            for (Map.Entry<UUID, LocationData> entry : previous.locations().perWorld().entrySet()) {
+        if (previous != null
+                && previous.locations() != null
+                && previous.locations().perWorld() != null) {
+            for (Map.Entry<UUID, LocationData> entry :
+                    previous.locations().perWorld().entrySet()) {
                 if (!settings.isIgnoredWorld(entry.getValue())) {
                     perWorld.put(entry.getKey(), entry.getValue());
                 }
@@ -121,7 +108,9 @@ public class PlayerDataCapturer {
                 settings.isArmorEnabled() ? ItemContainer.of(inventory.getArmorContents()) : null,
                 settings.isOffHandEnabled() ? ItemContainer.of(inventory.getItemInOffHand()) : null,
                 inventory.getHeldItemSlot(),
-                settings.isEnderChestEnabled() ? ItemContainer.of(player.getEnderChest().getContents()) : null);
+                settings.isEnderChestEnabled()
+                        ? ItemContainer.of(player.getEnderChest().getContents())
+                        : null);
     }
 
     private Map<String, Integer> captureStatistics(Player player) {
@@ -145,7 +134,8 @@ public class PlayerDataCapturer {
                 continue;
             }
 
-            Collection<String> criteria = player.getAdvancementProgress(advancement).getAwardedCriteria();
+            Collection<String> criteria =
+                    player.getAdvancementProgress(advancement).getAwardedCriteria();
             if (criteria.isEmpty()) {
                 continue;
             }

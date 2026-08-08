@@ -12,10 +12,10 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import lombok.RequiredArgsConstructor;
 import net.keyber.sync.data.PlayerSnapshot;
-import net.keyber.sync.storage.PlayerRepository;
-import net.keyber.sync.storage.mongo.MongoManager;
 import net.keyber.sync.service.SyncService;
 import net.keyber.sync.service.SyncSettings;
+import net.keyber.sync.storage.PlayerRepository;
+import net.keyber.sync.storage.mongo.MongoManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
@@ -84,7 +84,10 @@ public class PlayerSyncCommand {
 
             PlayerRepository.LockInfo lock = repository.findLock(snapshot.uuid());
 
-            send(sender, Component.text("Data for ", NamedTextColor.GRAY).append(Component.text(nameOf(snapshot), NamedTextColor.WHITE)));
+            send(
+                    sender,
+                    Component.text("Data for ", NamedTextColor.GRAY)
+                            .append(Component.text(nameOf(snapshot), NamedTextColor.WHITE)));
             detail(sender, "UUID", snapshot.uuid().toString());
 
             if (snapshot.profile() != null) {
@@ -94,15 +97,28 @@ public class PlayerSyncCommand {
             }
 
             detail(sender, "Inventory", describeInventory(snapshot));
-            detail(sender, "Statistics", snapshot.statistics() == null ? "not synced" : snapshot.statistics().size() + " stored");
-            detail(sender, "Advancements", snapshot.advancements() == null ? "not synced" : snapshot.advancements().awarded().size() + " with progress");
+            detail(
+                    sender,
+                    "Statistics",
+                    snapshot.statistics() == null
+                            ? "not synced"
+                            : snapshot.statistics().size() + " stored");
+            detail(
+                    sender,
+                    "Advancements",
+                    snapshot.advancements() == null
+                            ? "not synced"
+                            : snapshot.advancements().awarded().size() + " with progress");
 
             if (lock == null) {
                 detail(sender, "Lock", "free");
             } else {
-                detail(sender, "Lock", lock.server()
-                        + " (renewed " + elapsed(lock.renewedAt())
-                        + (lock.isStale(settings.getLeaseDurationMillis()) ? ", expired" : " ago") + ")");
+                detail(
+                        sender,
+                        "Lock",
+                        lock.server()
+                                + " (renewed " + elapsed(lock.renewedAt())
+                                + (lock.isStale(settings.getLeaseDurationMillis()) ? ", expired" : " ago") + ")");
             }
         });
     }
@@ -118,21 +134,18 @@ public class PlayerSyncCommand {
     private LiteralArgumentBuilder<CommandSourceStack> saveArgument() {
         return Commands.literal("save")
                 .requires(source -> source.getSender().hasPermission("playersync.command.save"))
-                .then(Commands.literal("all")
-                        .executes(context -> {
-                            CommandSender sender = context.getSource().getSender();
+                .then(Commands.literal("all").executes(context -> {
+                    CommandSender sender = context.getSource().getSender();
 
-                            // Spread across ticks: capturing everyone in a single tick is
-                            // exactly the spike the auto-save avoids.
-                            syncService.saveAllOnline(saved ->
-                                    success(sender, "Saved " + saved + " player(s)."));
-                            return 1;
-                        }))
-                .then(Commands.argument("player", ArgumentTypes.player())
-                        .executes(context -> {
-                            savePlayers(context, context.getSource().getSender());
-                            return 1;
-                        }));
+                    // Spread across ticks: capturing everyone in a single tick is
+                    // exactly the spike the auto-save avoids.
+                    syncService.saveAllOnline(saved -> success(sender, "Saved " + saved + " player(s)."));
+                    return 1;
+                }))
+                .then(Commands.argument("player", ArgumentTypes.player()).executes(context -> {
+                    savePlayers(context, context.getSource().getSender());
+                    return 1;
+                }));
     }
 
     private void savePlayers(CommandContext<CommandSourceStack> context, CommandSender sender) {
@@ -163,17 +176,20 @@ public class PlayerSyncCommand {
                 .then(Commands.argument("player", StringArgumentType.word())
                         .suggests(ONLINE_PLAYERS)
                         .executes(context -> {
-                            unlock(context.getSource().getSender(),
-                                    StringArgumentType.getString(context, "player"), false);
+                            unlock(
+                                    context.getSource().getSender(),
+                                    StringArgumentType.getString(context, "player"),
+                                    false);
                             return 1;
                         })
-                        .then(Commands.literal("force")
-                                .executes(context -> {
-                                    unlock(context.getSource().getSender(),
-                                            StringArgumentType.getString(context, "player"), true);
+                        .then(Commands.literal("force").executes(context -> {
+                            unlock(
+                                    context.getSource().getSender(),
+                                    StringArgumentType.getString(context, "player"),
+                                    true);
 
-                                    return 1;
-                                })));
+                            return 1;
+                        })));
     }
 
     private void unlock(CommandSender sender, String target, boolean force) {
@@ -196,14 +212,15 @@ public class PlayerSyncCommand {
             // believes the player is on it. Releasing it there would let that player's data
             // be written from two places at once, which is what the lease exists to prevent.
             if (!lock.isStale(settings.getLeaseDurationMillis()) && !force) {
-                error(sender, "The lock is held by '" + lock.server() + "' and is still active "
-                        + "(renewed " + elapsed(lock.renewedAt()) + " ago).");
+                error(
+                        sender,
+                        "The lock is held by '" + lock.server() + "' and is still active " + "(renewed "
+                                + elapsed(lock.renewedAt()) + " ago).");
                 return;
             }
 
             if (repository.forceRelease(snapshot.uuid())) {
-                success(sender, "Lock for " + nameOf(snapshot) + " released (it was held by '"
-                        + lock.server() + "').");
+                success(sender, "Lock for " + nameOf(snapshot) + " released (it was held by '" + lock.server() + "').");
             } else {
                 error(sender, "Could not release the lock.");
             }

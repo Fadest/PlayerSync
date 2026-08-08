@@ -1,20 +1,10 @@
 package net.keyber.sync.service.data;
 
 import lombok.RequiredArgsConstructor;
-import net.keyber.sync.data.impl.AdvancementsData;
-import net.keyber.sync.data.impl.EffectData;
-import net.keyber.sync.data.impl.InventoryData;
-import net.keyber.sync.data.impl.LocationData;
-import net.keyber.sync.data.impl.LocationsData;
 import net.keyber.sync.data.PlayerSnapshot;
-import net.keyber.sync.data.impl.StateData;
+import net.keyber.sync.data.impl.*;
 import net.keyber.sync.service.SyncSettings;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Registry;
-import org.bukkit.Statistic;
+import org.bukkit.*;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;
@@ -167,7 +157,10 @@ public class PlayerDataApplier {
                 continue;
             }
 
-            syncAdvancementCriteria(player, advancement, advancements.criteriaOf(advancement.getKey().toString()));
+            syncAdvancementCriteria(
+                    player,
+                    advancement,
+                    advancements.criteriaOf(advancement.getKey().toString()));
         }
     }
 
@@ -203,7 +196,8 @@ public class PlayerDataApplier {
             return null;
         }
 
-        LocationData fallback = settings.filterIgnoredWorld(locations.perWorld().get(player.getWorld().getUID()));
+        LocationData fallback = settings.filterIgnoredWorld(
+                locations.perWorld().get(player.getWorld().getUID()));
         return fallback == null ? null : fallback.toLocation();
     }
 }

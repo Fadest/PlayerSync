@@ -1,17 +1,17 @@
 package net.keyber.sync;
 
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.keyber.sync.command.PlayerSyncCommand;
 import net.keyber.sync.listener.AdvancementListener;
 import net.keyber.sync.listener.ConnectionListener;
-import net.keyber.sync.storage.credentials.MongoStorageCredentials;
+import net.keyber.sync.service.SyncService;
+import net.keyber.sync.service.SyncSettings;
 import net.keyber.sync.storage.PlayerRepository;
+import net.keyber.sync.storage.credentials.MongoStorageCredentials;
 import net.keyber.sync.storage.credentials.RedisStorageCredentials;
 import net.keyber.sync.storage.mongo.MongoManager;
 import net.keyber.sync.storage.redis.RedisManager;
 import net.keyber.sync.storage.redis.RedisMessenger;
-import net.keyber.sync.service.SyncService;
-import net.keyber.sync.service.SyncSettings;
-import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -100,18 +100,18 @@ public class PlayerSync extends JavaPlugin {
     }
 
     private void initializeSync() {
-        syncSettings = SyncSettings.from(getConfig().getConfigurationSection("sync"),
-                "server-" + getServer().getPort()
-        );
+        syncSettings = SyncSettings.from(
+                getConfig().getConfigurationSection("sync"),
+                "server-" + getServer().getPort());
 
-        playerRepository = new PlayerRepository(
-                MongoManager.getInstance().getPlayersCollection(), syncSettings, getLogger());
+        playerRepository =
+                new PlayerRepository(MongoManager.getInstance().getPlayersCollection(), syncSettings, getLogger());
         playerRepository.ensureIndexes();
 
         RedisClient client = RedisManager.getClient();
         if (client != null) {
-            redisMessenger = new RedisMessenger(RedisManager.getClient(), redisChannel,
-                    syncSettings.getServerId(), getLogger());
+            redisMessenger =
+                    new RedisMessenger(RedisManager.getClient(), redisChannel, syncSettings.getServerId(), getLogger());
             redisMessenger.start();
         }
 
@@ -130,8 +130,8 @@ public class PlayerSync extends JavaPlugin {
     private void registerCommand() {
         PlayerSyncCommand command = new PlayerSyncCommand(syncService, playerRepository, syncSettings, getLogger());
 
-        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event ->
-                event.registrar().register(command.build(), "Player data synchronisation admin commands.", List.of("psync")));
+        getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, event -> event.registrar()
+                .register(command.build(), "Player data synchronisation admin commands.", List.of("psync")));
     }
 
     private ConfigurationSection section(String path) {

@@ -9,7 +9,10 @@ import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.MemoryConfiguration;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 @Getter
 public class SyncSettings {
@@ -80,8 +83,7 @@ public class SyncSettings {
         this.enderChestEnabled = section.getBoolean("fields.inventory.ender-chest", true);
 
         this.statisticsEnabled = section.getBoolean("fields.statistics.enabled", true);
-        this.trackedStatistics = resolveStatistics(
-                section.getStringList("fields.statistics.tracked"));
+        this.trackedStatistics = resolveStatistics(section.getStringList("fields.statistics.tracked"));
 
         this.advancementsEnabled = section.getBoolean("fields.advancements.enabled", true);
 

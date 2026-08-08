@@ -13,7 +13,9 @@ public class LockWaitRegistry {
     public Watch watch(UUID playerId) {
         CountDownLatch latch = new CountDownLatch(1);
 
-        latchesByPlayer.computeIfAbsent(playerId, key -> ConcurrentHashMap.newKeySet()).add(latch);
+        latchesByPlayer
+                .computeIfAbsent(playerId, key -> ConcurrentHashMap.newKeySet())
+                .add(latch);
         return new Watch(playerId, latch);
     }
 

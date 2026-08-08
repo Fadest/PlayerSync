@@ -6,6 +6,7 @@ import org.bson.Document;
 import org.bson.types.Binary;
 
 import java.util.*;
+
 import static net.keyber.sync.util.ParseUtils.*;
 
 @UtilityClass
@@ -22,8 +23,7 @@ public final class PlayerDataCodec {
     public final String FIELD_ADVANCEMENTS = "advancements";
 
     public Document encode(PlayerSnapshot data) {
-        Document document = new Document(FIELD_ID, data.uuid())
-                .append(FIELD_SCHEMA, SCHEMA_VERSION);
+        Document document = new Document(FIELD_ID, data.uuid()).append(FIELD_SCHEMA, SCHEMA_VERSION);
 
         if (data.profile() != null) {
             document.append(FIELD_PROFILE, encodeProfile(data.profile()));
@@ -56,8 +56,7 @@ public final class PlayerDataCodec {
         List<Document> encoded = new ArrayList<>();
 
         for (Map.Entry<String, Set<String>> entry : advancements.awarded().entrySet()) {
-            encoded.add(new Document("key", entry.getKey())
-                    .append("criteria", new ArrayList<>(entry.getValue())));
+            encoded.add(new Document("key", entry.getKey()).append("criteria", new ArrayList<>(entry.getValue())));
         }
 
         return encoded;
@@ -181,7 +180,8 @@ public final class PlayerDataCodec {
         int version = intOf(document, FIELD_SCHEMA, SCHEMA_VERSION);
 
         if (version > SCHEMA_VERSION) {
-            throw new IllegalStateException(String.format("Schema Version %d is not supported for player %s", version, uuid.toString()));
+            throw new IllegalStateException(
+                    String.format("Schema Version %d is not supported for player %s", version, uuid.toString()));
         }
 
         return new PlayerSnapshot(
@@ -374,5 +374,4 @@ public final class PlayerDataCodec {
 
         return new AdvancementsData(awarded);
     }
-
 }

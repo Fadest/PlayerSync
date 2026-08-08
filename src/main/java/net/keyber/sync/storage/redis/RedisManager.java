@@ -41,8 +41,10 @@ public class RedisManager {
         } catch (RuntimeException exception) {
             closeQuietly(client);
 
-            throw new IllegalStateException("Could not connect to Redis at "
-                    + storageCredentials.getAddress() + ":" + storageCredentials.getPort(), exception);
+            throw new IllegalStateException(
+                    "Could not connect to Redis at " + storageCredentials.getAddress() + ":"
+                            + storageCredentials.getPort(),
+                    exception);
         }
 
         CLIENT = client;

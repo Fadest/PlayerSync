@@ -8,7 +8,6 @@ import net.keyber.sync.storage.PlayerRepository;
 import net.keyber.sync.storage.mongo.MongoManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.List;
@@ -30,8 +29,13 @@ public class SyncTasks {
     private BukkitTask leaseRenewTask;
     private BukkitTask retryTask;
 
-    protected SyncTasks(PlayerSync plugin, SyncService service, PlayerRepository repository,
-              PendingWriteQueue pendingWrites, SyncSettings settings, Logger logger) {
+    protected SyncTasks(
+            PlayerSync plugin,
+            SyncService service,
+            PlayerRepository repository,
+            PendingWriteQueue pendingWrites,
+            SyncSettings settings,
+            Logger logger) {
         this.plugin = plugin;
         this.service = service;
         this.repository = repository;
@@ -48,11 +52,14 @@ public class SyncTasks {
         if (settings.isRetryEnabled()) {
             long retryTicks = settings.getRetryIntervalSeconds() * 20L;
 
-            retryTask = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, this::retryPendingWrites, retryTicks, retryTicks);
+            retryTask = plugin.getServer()
+                    .getScheduler()
+                    .runTaskTimerAsynchronously(plugin, this::retryPendingWrites, retryTicks, retryTicks);
         }
 
         long renewTicks = Math.max(20L, settings.getLeaseRenewIntervalMillis() / 50L);
-        leaseRenewTask = plugin.getServer().getScheduler()
+        leaseRenewTask = plugin.getServer()
+                .getScheduler()
                 .runTaskTimerAsynchronously(plugin, this::renewLeases, renewTicks, renewTicks);
     }
 
@@ -125,7 +132,10 @@ public class SyncTasks {
         } catch (RuntimeException exception) {
             snapshots.forEach(pendingWrites::requeue);
 
-            logger.log(Level.WARNING, "MongoDB is still unreachable and " + pendingWrites.size() + " writes are still pending.", exception);
+            logger.log(
+                    Level.WARNING,
+                    "MongoDB is still unreachable and " + pendingWrites.size() + " writes are still pending.",
+                    exception);
         }
     }
 

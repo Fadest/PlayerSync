@@ -77,7 +77,7 @@ sync:
       respawn: true
 
       # Worlds that are never stored as the last location.
-      ignored-worlds: []
+      ignored-worlds: [ ]
 
     inventory:
       enabled: true
@@ -97,7 +97,7 @@ sync:
       # DAMAGE_DEALT, DAMAGE_TAKEN, JUMP, WALK_ONE_CM, SPRINT_ONE_CM,
       # SWIM_ONE_CM, FALL_ONE_CM, FLY_ONE_CM, LEAVE_GAME, FISH_CAUGHT,
       # ANIMALS_BRED, ITEM_ENCHANTED, RAID_WIN, TRADED_WITH_VILLAGER.
-      tracked: []
+      tracked: [ ]
 
     advancements:
       enabled: true
