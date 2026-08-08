@@ -1,0 +1,103 @@
+storage:
+
+  mongo:
+    uri: "mongodb://playersync:playersync@localhost:27017/?authSource=admin"
+
+    # Where the data lives.
+    database: playersync
+    collection: players
+
+    thread-pool-size: 4
+
+  redis:
+    # Redis is MANDATORY on a network with a proxy (Velocity, BungeeCord).
+    enabled: true
+
+    address: localhost
+    port: 6379
+
+    # Optional
+    username: ""
+    password: ""
+
+    # Pub/sub channel. Every server on the network must share it.
+    channel: playersync
+
+    min-idle: 1
+    max-total: 16
+
+sync:
+  # Unique identifier for THIS server within the network.
+  server-id: ""
+
+  # How long to wait for another server to release its lease over a transfer before rejecting the login.
+  lease-acquire-timeout-ms: 5000
+
+  # How long a lease survives without being renewed before another server claims it.
+  lease-duration-ms: 60000
+
+  # Periodic save of connected players, so a server that dies without shutting
+  # down cleanly does not lose everything.
+  #
+  # Players are not all saved at once, they are spread across the interval
+  auto-save:
+    enabled: true
+    interval-seconds: 300
+
+  # Retry for writes that failed because MongoDB was unavailable.
+  retry:
+    enabled: true
+    interval-seconds: 30
+    max-pending: 500
+
+  # Fields to synchronise.
+  # A disabled block is not captured, not written and not applied
+  fields:
+
+    # UUID, last known name, first login, last connection and last server they were on.
+    profile:
+      enabled: true
+
+    # Health, max health, food, saturation, exhaustion, experience, game mode,
+    # flight, speeds, fire and fall distance.
+    state:
+      enabled: true
+      potion-effects: true
+
+    locations:
+      enabled: true
+
+      # Put the player back where they were on join. Turn it off on servers with a
+      # fixed spawn.
+      apply-on-join: true
+
+      # Also store the last position in each world separately.
+      per-world: true
+
+      respawn: true
+
+      # Worlds that are never stored as the last location.
+      ignored-worlds: []
+
+    inventory:
+      enabled: true
+      main: true
+      armor: true
+      off-hand: true
+      held-slot: true
+      ender-chest: true
+
+    statistics:
+      enabled: true
+
+      # Statistics to synchronise.
+      #
+      # Empty uses the default list: PLAY_ONE_MINUTE, TOTAL_WORLD_TIME,
+      # TIME_SINCE_DEATH, TIME_SINCE_REST, DEATHS, MOB_KILLS, PLAYER_KILLS,
+      # DAMAGE_DEALT, DAMAGE_TAKEN, JUMP, WALK_ONE_CM, SPRINT_ONE_CM,
+      # SWIM_ONE_CM, FALL_ONE_CM, FLY_ONE_CM, LEAVE_GAME, FISH_CAUGHT,
+      # ANIMALS_BRED, ITEM_ENCHANTED, RAID_WIN, TRADED_WITH_VILLAGER.
+      tracked: []
+
+    advancements:
+      enabled: true

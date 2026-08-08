@@ -1,0 +1,27 @@
+name: PlayerSync
+description: $description
+version: '${version}'
+main: net.keyber.sync.PlayerSync
+api-version: '1.21'
+authors: [ Fadest ]
+libraries:
+  - redis.clients:jedis:7.5.3
+  - org.mongodb:mongodb-driver-sync:5.9.1
+
+permissions:
+  playersync.command:
+    description: Access to the /playersync command.
+    default: op
+    children:
+      playersync.command.info: true
+      playersync.command.save: true
+      playersync.command.unlock: true
+  playersync.command.info:
+    description: View a player's stored data.
+    default: op
+  playersync.command.save:
+    description: Force a save for a player.
+    default: op
+  playersync.command.unlock:
+    description: Release a player's session lock.
+    default: op
