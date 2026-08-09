@@ -10,7 +10,7 @@ experiencia, sus efectos, sus estadísticas y sus logros exactamente como los de
 
 Java 21, Paper 1.21.x, MongoDB 4.4+ y Redis (obligatorio detrás de un proxy).
 
-## Puesta en marcha
+## Setup
 
 Copia el jar en `plugins/`, arranca una vez para generar el `config.yml`, rellena la
 conexión y el server-id, y reinicia.
